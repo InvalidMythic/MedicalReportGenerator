@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Website made by Seth Zyair -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Report Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-white">
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Medical Report Generator</h2>
+
+    <!-- Form for Report Generation -->
+    <form id="reportForm" class="bg-white p-4 rounded shadow-sm">
+        <h4 class="mb-3">Report Details</h4>
+
+        <!-- Dispatch -->
+        <div class="mb-3">
+            <label for="dispatchInfo" class="form-label">Dispatch</label>
+            <input type="text" class="form-control" id="dispatchInfo" placeholder="Ex: EMS Requested to postal ---- for ----" required>
+        </div>
+
+        <!-- Chief Complaint -->
+        <div class="mb-3">
+            <label for="chiefComplaint" class="form-label">Chief Complaint</label>
+            <input type="text" class="form-control" id="chiefComplaint" placeholder="Ex: Officer Down" required>
+        </div>
+
+        <!-- History Section -->
+        <div class="mb-3">
+            <label for="patienthistory" class="form-label">Patient History</label>
+            <input type="text" class="form-control" id="patienthistory" placeholder="Ex: What did you learn about the patient?" required>
+        </div>
+
+        <!-- Assessment -->
+        <div class="mb-3">
+            <label for="assessment" class="form-label">Assessment</label>
+            <textarea class="form-control" id="assessment" rows="3" placeholder="What is the patients injuries, vitals, noticeable abnormalities, ect?"></textarea>
+        </div>
+
+        <!-- Rx Treatments -->
+        <div class="mb-3">
+            <label for="treatments" class="form-label">Rx Treatments</label>
+            <textarea class="form-control" id="treatments" rows="3" placeholder="What did you do?"></textarea>
+        </div>
+
+        <!-- Transport -->
+        <div class="mb-3">
+            <label for="transport" class="form-label">Transport</label>
+            <input type="text" class="form-control" id="transport" placeholder="Enter transport details Ex: Code 3 - Sandy Shores Medical Centre">
+        </div>
+
+        <!-- Submitted by and Position -->
+        <div class="mb-3">
+            <label for="submittedBy" class="form-label">Submitted by</label>
+            <input type="text" class="form-control" id="submittedBy" placeholder="Enter your name Ex: Seth Zyair">
+        </div>
+        <div class="mb-3">
+            <label for="position" class="form-label">Position</label>
+            <input type="text" class="form-control" id="position" placeholder="Enter your position Ex: FD-000 | A-EMT">
+        </div>
+
+        <!-- Date -->
+        <div class="mb-3">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" class="form-control" id="date">
+        </div>
+
+        <!-- Additional Units on Scene -->
+        <div class="mb-3">
+            <label for="additionalUnits" class="form-label">Additional Units on Scene</label>
+            <input type="text" class="form-control" id="additionalUnits" placeholder="Enter additional units on scene">
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+        <button type="button" class="btn btn-warning" id="updateBtn" onclick="updateReport()" style="display: none;">Update Report</button>
+    </form>
+
+    <!-- Display Past Reports -->
+    <h4 class="mt-5">Past Reports</h4>
+    <ul id="pastReports" class="list-group mb-3"></ul>
+
+    <!-- Download All Reports -->
+    <button class="btn btn-success" onclick="downloadAllReports()">Download All Reports as .txt</button>
+</div>
+
+<script>
+    let reports = [];
+    let editIndex = -1;
+
+    // Function to generate a report
+    function generateReport() {
+        const report = gatherFormData();
+        reports.push(report);
+        displayPastReports();
+        clearForm();
+    }
+
+    // Function to delete a report
+        function deleteReport(index) {
+        reports.splice(index, 1);
+        displayPastReports();
+    }
+
+    // Function to gather form data into a report object
+    function gatherFormData() {
+        return {
+            dispatch: document.getElementById('dispatchInfo').value,
+            chiefComplaint: document.getElementById('chiefComplaint').value,
+            patienthistory: document.getElementById('patienthistory').value,
+            assessment: document.getElementById('assessment').value,
+            treatments: document.getElementById('treatments').value,
+            transport: document.getElementById('transport').value,
+            submittedBy: document.getElementById('submittedBy').value,
+            position: document.getElementById('position').value,
+            date: document.getElementById('date').value,
+            additionalUnits: document.getElementById('additionalUnits').value,
+        };
+    }
+
+    // Function to display past reports
+    function displayPastReports() {
+        const pastReportsList = document.getElementById('pastReports');
+        pastReportsList.innerHTML = '';
+        reports.forEach((report, index) => {
+            const reportItem = document.createElement('li');
+            reportItem.classList.add('list-group-item');
+            reportItem.innerHTML = `
+                <strong>Medical Report #${index + 1}</strong><br>
+                Dispatch: ${report.dispatch}<br>
+                Chief Complaint: ${report.chiefComplaint}<br>
+                History: ${report.patienthistory}<br>
+                Assessment: ${report.assessment}<br>
+                Rx Treatments: ${report.treatments}<br>
+                Transport: ${report.transport}<br>
+                Submitted by: ${report.submittedBy}<br>
+                Position: ${report.position}<br>
+                Date: ${report.date}<br>
+                Additional Units on Scene: ${report.additionalUnits}<br>
+                <button class="btn btn-sm btn-warning mt-2" onclick="editReport(${index})">Edit</button>
+                <button class="btn btn-danger btn-sm mt-2" onclick="deleteReport(${index})">Delete</button>
+                `;
+            pastReportsList.appendChild(reportItem);
+        });
+    }
+
+    // Function to edit a report
+    function editReport(index) {
+        editIndex = index;
+        const report = reports[index];
+        document.getElementById('dispatchInfo').value = report.dispatch;
+        document.getElementById('chiefComplaint').value = report.chiefComplaint;
+        document.getElementById('patienthistory').value = report.patienthistory;
+        document.getElementById('assessment').value = report.assessment;
+        document.getElementById('treatments').value = report.treatments;
+        document.getElementById('transport').value = report.transport;
+        document.getElementById('submittedBy').value = report.submittedBy;
+        document.getElementById('position').value = report.position;
+        document.getElementById('date').value = report.date;
+        document.getElementById('additionalUnits').value = report.additionalUnits;
+
+        // Show update button
+        document.getElementById('updateBtn').style.display = 'inline-block';
+    }
+
+    // Function to update a report
+    function updateReport() {
+        const updatedReport = gatherFormData();
+        reports[editIndex] = updatedReport;
+        displayPastReports();
+        clearForm();
+        document.getElementById('updateBtn').style.display = 'none';
+        editIndex = -1;
+    }
+
+    // Function to clear the form after generating/updating a report
+    function clearForm() {
+        document.getElementById('reportForm').reset();
+    }
+
+    // Function to download all reports as a .txt file
+    function downloadAllReports() {
+        let text = '';
+        reports.forEach((report, index) => {
+            text += `Medical Report #${index + 1}\n\n`;
+            text += `Dispatch: ${report.dispatch}\n\n`;
+            text += `Chief Complaint: ${report.chiefComplaint}\n\n`;
+            text += `History: ${report.patienthistory}\n\n`;
+            text += `Assessment: ${report.assessment}\n\n`;
+            text += `Rx Treatments: ${report.treatments}\n\n`;
+            text += `Transport: ${report.transport}\n\n`;
+            text += `Submitted by: ${report.submittedBy}\n`;
+            text += `Position: ${report.position}\n`;
+            text += `Date: ${report.date}\n`;
+            text += `Additional Units on Scene: ${report.additionalUnits}\n\n\n`;
+        });
+
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'medical_reports.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
