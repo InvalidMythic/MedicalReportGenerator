@@ -191,7 +191,18 @@
 
     // Function to clear the form after generating/updating a report
     function clearForm() {
+        // Store values of the fields to keep
+        const dateValue = document.getElementById('date').value;
+        const positionValue = document.getElementById('position').value;
+        const submittedByValue = document.getElementById('submittedBy').value;
+
+        // Reset the entire form
         document.getElementById('reportForm').reset();
+
+        // Reapply the stored values
+        document.getElementById('date').value = dateValue;
+        document.getElementById('position').value = positionValue;
+        document.getElementById('submittedBy').value = submittedByValue;
     }
 
     // Function to download all reports as a .txt file
